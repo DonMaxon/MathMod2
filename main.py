@@ -1,6 +1,6 @@
 
 import sys
-sys.path.append('C:\\Users\Max\AppData\Local\Programs\Python\Python310\Lib\site-packages')
+#sys.path.append('C:\\Users\Max\AppData\Local\Programs\Python\Python310\Lib\site-packages')
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication
@@ -32,7 +32,7 @@ def cellClick(row, col):
     selected_column = col
     print(row)
 
-Form, Window = uic.loadUiType('D:\PythonProjects\MathMod2\interface.ui')
+Form, Window = uic.loadUiType('interface.ui')
 app = QApplication([])
 window = Window()
 form = Form()
