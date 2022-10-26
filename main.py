@@ -1,6 +1,6 @@
 
 import sys
-#sys.path.append('C:\\Users\Max\AppData\Local\Programs\Python\Python310\Lib\site-packages')
+sys.path.append('C:\\Users\Max\AppData\Local\Programs\Python\Python310\Lib\site-packages')
 import numpy as np
 import pandas as pd
 import solver as slv
