@@ -113,10 +113,10 @@ def count_common(n_0: np.ndarray, a: np.ndarray, m: np.ndarray, t: int, step: fl
 	res[:, 0] = np.copy(n_0)
 	time = np.arange(start=0, stop=t, step=step, dtype=float)
 	for i in range(1, step_count):
-		k1 = a * res[:, i-1] - res[:, i-1]@m*res[:, i-1]
-		k2 = a * (res[:, i-1]+k1*step/2) - (res[:, i-1]+k1*step/2)@m*(res[:, i-1]+k1*step/2)
-		k3 = a * (res[:, i-1]+k2*step/2) - (res[:, i-1]+k2*step/2)@m*(res[:, i-1]+k2*step/2)
-		k4 = a * (res[:, i-1]+k3*step) - (res[:, i-1]+k3*step)@m*(res[:, i-1]+k3*step)
+		k1 = a * res[:, i-1] + m@res[:, i-1]*res[:, i-1]
+		k2 = a * (res[:, i-1]+k1*step/2) + m@(res[:, i-1]+k1*step/2)*(res[:, i-1]+k1*step/2)
+		k3 = a * (res[:, i-1]+k2*step/2) + m@(res[:, i-1]+k2*step/2)*(res[:, i-1]+k2*step/2)
+		k4 = a * (res[:, i-1]+k3*step) + m@(res[:, i-1]+k3*step)*(res[:, i-1]+k3*step)
 		res[:, i] = res[:, i-1] + step/6*(k1 + 2*k2 + 2*k3 + k4)
 	return time, res
 
