@@ -73,6 +73,7 @@ def getData():
     epidemic_probability = float(form.lineEdit_6.text())
     epidemic_time = int(form.lineEdit_5.text())
     epidemic_coeff = float(form.lineEdit_7.text())
+    population_num = int(form.lineEdit_8.text())
     print(modelling_time)
     print(step)
     print(initial_population)
@@ -81,7 +82,8 @@ def getData():
     print(epidemic_probability)
     print(epidemic_time)
     print(epidemic_coeff)
-    return initial_population, interaction_coeffs, interaction_matrix, modelling_time, step, epidemic_coeff, epidemic_time, epidemic_probability
+    print(population_num)
+    return initial_population, interaction_coeffs, interaction_matrix, modelling_time, step, epidemic_coeff, epidemic_time, epidemic_probability, population_num
 
 
 Form, Window = uic.loadUiType('interface.ui')
