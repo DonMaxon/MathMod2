@@ -1,108 +1,18 @@
 import numpy as np
-import enum
 import plotly.graph_objects as go
+import random
 
 
-class ModelType(enum.Enum):
-	MALTUS = 0
-	LOGISTIC = 1
-	COMMON = 2
-
-
-def solve(n_0: np.ndarray, a: np.ndarray, m: np.ndarray, t: int, step: float) -> tuple:
-	"""
-	Функция решения задачи нахождения численности популяций
-	:param n_0: начальные численности популяций
-	:param a: коэффициенты прироста популяций
-	:param m: матрица взаимодействия популяций
-	:param t: время моделирования
-	:param step: временной шаг
-	:return: массив времени и численности популяций
-	"""
-	m_type = getModelType(m)
-	if m_type == ModelType.MALTUS:
-		print('maltus')
-		return count_maltus(n_0, a, t, step)
-	if m_type == ModelType.LOGISTIC:
-		print('logistic')
-		return count_logistic(n_0, a, m, t, step)
-	if m_type == ModelType.COMMON:
-		print('common')
-		return count_common(n_0, a, m, t, step)
-
-
-def getModelType(matrix: np.ndarray) -> ModelType:
-	"""
-	Функция по виду матрицы определяет тип модели взаимодействия популяций
-	Нулевая матрица - модель Мальтуса, для которой существует точное решение
-	Диагональная матрица - логистическая модель, для которой тоже существует точное решение
-	Общая модель (Лотки-Вольтерра) - решение будет искаться с помощью интегрирования системы дифференциальных уравнений
-	:param matrix: матрица взаимодействия популяций
-	:return: тип модели взаимодействия популяций
-	"""
-	if len(matrix.shape) != 2:
-		raise Exception("На вход подана не матрица!")
-	zero_flag = True
-	for i in range(matrix.shape[1]):
-		indexes = np.nonzero(matrix[i, :])
-		print(indexes[0])
-		if zero_flag:
-			if len(indexes[0]):
-				zero_flag = False
-		if zero_flag:
-			continue
-		if len(indexes[0]) == 1 and indexes[0][0] == i:
-			continue
-		return ModelType.COMMON
-	return ModelType.MALTUS if zero_flag else ModelType.LOGISTIC
-
-
-def count_maltus(n_0: np.ndarray, a: np.ndarray, t: int, step: float) -> tuple:
-	"""
-	Функция ведет расчет численности популяции по модели Мальтуса
-	:param n_0: начальная численность каждой популяции
-	:param a: коэффициенты прироста для каждой популяции
-	:param t: время моделирования
-	:param step: временной шаг
-	:return: вектор времени и матрица изменения популяций
-	"""
-	step_count = int(t / step)
-	pop_number = n_0.shape[0]
-	res = np.zeros((pop_number, step_count), dtype=float)
-	res[:, 0] = np.copy(n_0)
-	time = np.arange(start=0, stop=t, step=step, dtype=float)
-	for i in range(1, step_count):
-		res[:, i] = n_0*np.exp(a*time[i])
-	return time, res
-
-
-def count_logistic(n_0: np.ndarray, a: np.ndarray, m: np.ndarray, t: int, step: float) -> tuple:
-	"""
-	Функция выполняет расчет численности популяций по логистической модели
-	:param n_0: начальная численность популяций
-	:param a: коэффициенты прироста
-	:param m: матрица взаимодействия популяций
-	:param t: время моделирования
-	:param step: временной шаг
-	:return: массив времени и матрица численности популяций
-	"""
-	step_count = int(t / step)
-	pop_number = n_0.shape[0]
-	res = np.zeros((pop_number, step_count), dtype=float)
-	res[:, 0] = np.copy(n_0)
-	time = np.arange(start=0, stop=t, step=step, dtype=float)
-	for i in range(1, step_count):
-		for j in range(pop_number):
-			res[j, i] = a[j] * n_0[j] * np.exp(a[j] * time[i]) / (a[j] - m[j, j]*n_0[j]*(np.exp(a[j] * time[i])-1))
-	return time, res
-
-
-def count_common(n_0: np.ndarray, a: np.ndarray, m: np.ndarray, t: int, step: float) -> tuple:
+def count_common(n_0: np.ndarray, a: np.ndarray, m: np.ndarray, prob: float, epid: int, prolongation: int, c: float, t: int, step: float) -> tuple:
 	"""
 	Функция выполняет расчет путем решения системы дифференциальных уравнений
 	:param n_0: начальная численность популяции
 	:param a: коэффициенты прироста популяций
 	:param m: матрица взаимодействия популяций
+	:param prob: вероятность наступления эпидемии
+	:param epid: номер популяции, для которой может возникнуть эпидемия
+	:param prolongation: длительность эпидемии
+	:param c: коэффициент затухания при эпидемии
 	:param t: время моделирования
 	:param step: временной шаг
 	:return: массив времени и численности популяций
@@ -112,7 +22,20 @@ def count_common(n_0: np.ndarray, a: np.ndarray, m: np.ndarray, t: int, step: fl
 	res = np.zeros((pop_number, step_count), dtype=float)
 	res[:, 0] = np.copy(n_0)
 	time = np.arange(start=0, stop=t, step=step, dtype=float)
+	is_epid = False
+	till_end = prolongation
 	for i in range(1, step_count):
+		p = random.random()
+		if till_end == 0:
+			is_epid = False
+			till_end = prolongation
+			a[epid-1] += c
+		if not is_epid and p < prob:
+			a[epid-1] -= c
+			is_epid = True
+		if is_epid:
+			till_end -= 1
+		print(a[epid-1])
 		k1 = a * res[:, i-1] + m@res[:, i-1]*res[:, i-1]
 		k2 = a * (res[:, i-1]+k1*step/2) + m@(res[:, i-1]+k1*step/2)*(res[:, i-1]+k1*step/2)
 		k3 = a * (res[:, i-1]+k2*step/2) + m@(res[:, i-1]+k2*step/2)*(res[:, i-1]+k2*step/2)

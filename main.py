@@ -27,8 +27,8 @@ def delete_planet():
 
 def draw():
     global form
-    n_0, a, m, t, step = getData()
-    time, res = slv.solve(n_0=n_0, a=a, m=m, t=t, step=step)
+    n_0, a, m, t, step, c, start, prob, j = getData()
+    time, res = slv.count_common(n_0=n_0, a=a, m=m, t=t, step=step, c=c, epid=j, prolongation=start, prob=prob)
     for i in range(time.shape[0]):
         form.lineEdit_2.setText(str(np.sum(res[:, i])))
         form.lineEdit_3.setText(str(time[i]))
