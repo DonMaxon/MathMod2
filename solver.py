@@ -34,7 +34,7 @@ def count_common(n_0: np.ndarray, a: np.ndarray, m: np.ndarray, prob: float, epi
 			a[epid-1] -= c
 			is_epid = True
 		if is_epid:
-			till_end -= 1
+			till_end -= step
 		print(a[epid-1])
 		k1 = a * res[:, i-1] + m@res[:, i-1]*res[:, i-1]
 		k2 = a * (res[:, i-1]+k1*step/2) + m@(res[:, i-1]+k1*step/2)*(res[:, i-1]+k1*step/2)
